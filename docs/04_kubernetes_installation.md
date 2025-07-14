@@ -64,22 +64,23 @@ apt update
 apt install -y kubelet kubeadm kubectl
 apt-mark hold kubelet kubeadm kubectl
 ```
-🐾 Install Calico CNI (on Control Plane)
-Apply the Tigera Calico manifest:
-
+🧪 Initialize the Control Plane (only on control-plane node)
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/calico.yaml
+kubeadm init --pod-network-cidr=192.168.0.0/16
 ```
-Check the pods:
-
+Set up kubectl for your user:
 ```bash
-kubectl get pods -n kube-system -w
+mkdir -p $HOME/.kube
+cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+chown $(id -u):$(id -g) $HOME/.kube/config
 ```
-Wait until all calico pods are in Running state.
-
-You can also confirm:
-
+🌐 Install Calico CNI
 ```bash
-kubectl get nodes -o wide
+curl https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/calico.yaml -O
+kubectl apply -f calico.yaml
 ```
-🧠 Tip: Once Calico is installed and running, worker nodes will be able to fully join and run workloads.
+Wait a minute, then verify:
+```bash
+kubectl get pods -n kube-system
+```
+Pods like calico-kube-controllers and calico-node-xxxxx should be in Running state.
