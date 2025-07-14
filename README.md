@@ -53,6 +53,7 @@ proxmox-k8s-lab/
     ├── join-node.sh
 (```)
 
+
 🚀 Features to Add
  Kubernetes Dashboard
 
