@@ -8,30 +8,30 @@ A complete step-by-step home lab using Proxmox + Debian 12 + kubeadm to build a 
 
 ## 🧰 Lab Topology
 
-- **Hypervisor**: Proxmox VE
-- **Control Plane**: Ubuntu 24.04 (`controlplane-1`)
-- **Worker Nodes**:
-  - Ubuntu 24.04 (`workernode-1`)
-  - Ubuntu 24.04 (`workernode-2`)
+- **Hypervisor**: Proxmox VE  
+- **Control Plane**: Ubuntu 24.04 (`controlplane-1`)  
+- **Worker Nodes**:  
+  - Ubuntu 24.04 (`workernode-1`)  
+  - Ubuntu 24.04 (`workernode-2`)  
 - **Networking**: Static IP on same subnet `192.168.178.0/24`
 
 ---
 
 ## ⚙️ Tools & Versions
 
-| Component       | Version    |
-|----------------|------------|
-| Proxmox VE     | 8.x        |
-| OS             | Debian 12 / Ubuntu 24.04 |
-| Kubernetes     | v1.33.x    |
-| Container Runtime | containerd |
-| Bootstrap Tool | kubeadm    |
+| Component         | Version              |
+|------------------|----------------------|
+| Proxmox VE       | 8.x                  |
+| OS               | Debian 12 / Ubuntu 24.04 |
+| Kubernetes       | v1.33.x              |
+| Container Runtime| containerd           |
+| Bootstrap Tool   | kubeadm              |
 
 ---
 
 ## 📁 Repo Structure
 
-```bash
+```
 proxmox-k8s-lab/
 ├── README.md
 ├── docs/
@@ -51,43 +51,31 @@ proxmox-k8s-lab/
     ├── install-containerd.sh
     ├── install-kubernetes.sh
     ├── join-node.sh
-(```)
+```
+🚀 **Features to Add**
+- Kubernetes Dashboard
+- Metrics Server + HPA
+- Calico or Cilium UI
+- Persistent Storage (local-path / NFS)
+- Velero or etcd backup
+- RBAC, Network Policies, PodSecurity Standards
+- CKA / CKAD / CKS scenario simulation
 
-
-🚀 Features to Add
- Kubernetes Dashboard
-
- Metrics Server + HPA
-
- Calico/Cilium UI
-
- Persistent Storage (local-path / NFS)
-
- Velero or etcd backup
-
- RBAC, Network Policies, PodSecurity Standards
-
- CKA / CKAD / CKS scenario simulation
-
-🧠 Why This Lab?
+🧠 **Why This Lab?**  
 This is a long-term home lab I use to:
+- Practice real-world Kubernetes setups
+- Test infrastructure automation
+- Prepare for CNCF certifications
+- Help others in the community
 
-Practice real-world Kubernetes setups
+📸 **Screenshots & Diagrams**  
+Add images to the `images/` folder and link them in your docs.
 
-Test infrastructure automation
-
-Prepare for CNCF certifications
-
-Help others in the community
-
-📸 Screenshots & Diagrams
-Add images to images/ and link them in your docs.
-
-🛠 How to Use
-Step-by-step instructions live in the docs/ folder.
+🛠 **How to Use**  
+Step-by-step instructions live in the `docs/` folder.  
 You can recreate this lab from scratch or fork it to customize.
 
-📬 License & Contributions
-Open to contributions. Star ⭐️ the repo if it helps you!
+📬 **License & Contributions**  
+Open to contributions.  
 
-MIT License © Marko Filipović
+⭐️ Star the repo if it helps you!
