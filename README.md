@@ -51,3 +51,41 @@ proxmox-k8s-lab/
     ├── install-containerd.sh
     ├── install-kubernetes.sh
     ├── join-node.sh
+
+🚀 Features to Add
+ Kubernetes Dashboard
+
+ Metrics Server + HPA
+
+ Calico/Cilium UI
+
+ Persistent Storage (local-path / NFS)
+
+ Velero or etcd backup
+
+ RBAC, Network Policies, PodSecurity Standards
+
+ CKA / CKAD / CKS scenario simulation
+
+🧠 Why This Lab?
+This is a long-term home lab I use to:
+
+Practice real-world Kubernetes setups
+
+Test infrastructure automation
+
+Prepare for CNCF certifications
+
+Help others in the community
+
+📸 Screenshots & Diagrams
+Add images to images/ and link them in your docs.
+
+🛠 How to Use
+Step-by-step instructions live in the docs/ folder.
+You can recreate this lab from scratch or fork it to customize.
+
+📬 License & Contributions
+Open to contributions. Star ⭐️ the repo if it helps you!
+
+MIT License © Marko Filipović
