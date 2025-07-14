@@ -51,6 +51,7 @@ proxmox-k8s-lab/
     ├── install-containerd.sh
     ├── install-kubernetes.sh
     ├── join-node.sh
+(```)
 
 🚀 Features to Add
  Kubernetes Dashboard
