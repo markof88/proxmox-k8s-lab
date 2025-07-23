@@ -36,6 +36,16 @@ sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.to
 systemctl restart containerd
 systemctl enable containerd
 ```
+🧩 Configure crictl for containerd
+```bash
+sudo tee /etc/crictl.yaml > /dev/null <<EOF
+runtime-endpoint: unix:///run/containerd/containerd.sock
+image-endpoint: unix:///run/containerd/containerd.sock
+EOF
+
+# Verify connection
+sudo crictl info
+```
 
 🔐 Disable Swap & Load Kernel Mods
 ```bash
