@@ -1,96 +1,152 @@
 ### 🚀 Kubernetes Installation (kubeadm)
 
-This guide walks you through installing a minimal Kubernetes setup (control-plane only) using kubeadm.
+This guide precisely documents the exact steps executed on the master and worker nodes during Kubernetes installation using `kubeadm`.
 
-### 🛠 Prepare the System  
-Run on all nodes (control-plane and workers):
-
+## 🧠 Master Node – Step-by-Step
+### 🧮 Enable IP Forwarding
 ```bash
-# Enable kernel modules
-modprobe overlay
-modprobe br_netfilter
-```
-
-```bash
-# Set sysctl params
-cat <<EOF | tee /etc/sysctl.d/kubernetes.conf
-net.bridge.bridge-nf-call-iptables = 1
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
 net.ipv4.ip_forward = 1
-net.bridge.bridge-nf-call-ip6tables = 1
 EOF
-
-sysctl --system
+sudo sysctl --system
 ```
 
-📦 Install containerd
+
+### 📦 Install kubeadm, kubelet, kubectl
 ```bash
-apt update && apt install -y containerd
-
-# Generate default config
-mkdir -p /etc/containerd
-containerd config default | tee /etc/containerd/config.toml
-
-# Set SystemdCgroup = true
-sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
-
-systemctl restart containerd
-systemctl enable containerd
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.33/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+kubeadm version
 ```
-🧩 Configure crictl for containerd
+
+
+### 📦 Install and Configure containerd
 ```bash
-sudo tee /etc/crictl.yaml > /dev/null <<EOF
-runtime-endpoint: unix:///run/containerd/containerd.sock
-image-endpoint: unix:///run/containerd/containerd.sock
-EOF
-
-# Verify connection
-sudo crictl info
+sudo apt update
+sudo apt install -y containerd
+ps -p 1
+cd /etc/
+sudo mkdir -p /etc/containerd
+containerd config default | sed 's/SystemdCgroup = false/SystemdCgroup = true/' | sudo tee /etc/containerd/config.toml
+cat /etc/containerd/config.toml | grep -i SystemdCgroup
+sudo systemctl restart containerd
 ```
 
-🔐 Disable Swap & Load Kernel Mods
+
+### 🌐 Verify IP Address
 ```bash
-swapoff -a
-sed -i '/ swap / s/^/#/' /etc/fstab
+ip add
 ```
 
-Ensure modules are loaded persistently:
 
+### 🧪 Initialize the Control Plane
 ```bash
-cat <<EOF | tee /etc/modules-load.d/k8s.conf
-br_netfilter
-overlay
-EOF
+sudo kubeadm init --apiserver-advertise-address 192.168.178.101 --pod-network-cidr "10.244.0.0/16" --upload-certs
 ```
 
-🔧 Install kubeadm, kubelet & kubectl
-```bash
-apt update && apt install -y apt-transport-https curl gpg
 
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.33/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /" | tee /etc/apt/sources.list.d/kubernetes.list
-
-apt update
-apt install -y kubelet kubeadm kubectl
-apt-mark hold kubelet kubeadm kubectl
-```
-🧪 Initialize the Control Plane (only on control-plane node)
-```bash
-kubeadm init --pod-network-cidr=192.168.0.0/16
-```
-Set up kubectl for your user:
+### 📁 Set Up kubectl Access
 ```bash
 mkdir -p $HOME/.kube
-cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-chown $(id -u):$(id -g) $HOME/.kube/config
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
-🌐 Install Calico CNI
+
+
+### 🛰 Install Calico (Tigera Operator)
 ```bash
-curl https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/calico.yaml -O
-kubectl apply -f calico.yaml
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.2/manifests/operator-crds.yaml
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.2/manifests/tigera-operator.yaml
+cd /root
+curl -O https://raw.githubusercontent.com/projectcalico/calico/v3.30.2/manifests/custom-resources.yaml
+vi custom-resources.yaml # edited to use 10.244.0.0/16 and VXLAN
+kubectl create -f custom-resources.yaml
 ```
-Wait a minute, then verify:
+
+
+### 🔍 Watch Pods and Nodes
 ```bash
-kubectl get pods -n kube-system
+watch kubectl get pods -A
+kubectl get nodes
+sudo systemctl enable --now kubelet
 ```
 Pods like calico-kube-controllers and calico-node-xxxxx should be in Running state.
+
+
+
+---
+
+
+## ⚙️ Worker Node – Step-by-Step
+
+
+### 🔧 Basic Checks and System Prep
+```bash
+uname -r
+ifconfig -a
+sudo cat /sys/class/dmi/id/product_uuid
+nc 127.0.0.1 6443 -zv -w 2
+```
+
+
+### 🔐 Disable Swap
+```bash
+sudo swapoff -a
+vi /etc/fstab # comment out swap line
+cat /etc/fstab
+```
+
+
+### 🧮 Enable IP Forwarding
+```bash
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.ipv4.ip_forward = 1
+EOF
+sudo sysctl --system
+```
+
+
+### 📦 Install kubeadm, kubelet, kubectl
+```bash
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.33/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+kubeadm version
+```
+
+
+### 📦 Install and Configure containerd
+```bash
+sudo apt update
+sudo apt install -y containerd
+ps -p 1
+sudo mkdir -p /etc/containerd
+containerd config default | sed 's/SystemdCgroup = false/SystemdCgroup = true/' | sudo tee /etc/containerd/config.toml
+cat /etc/containerd/config.toml | grep -i SystemdCgroup -B 50
+sudo systemctl restart containerd
+```
+
+
+### 🔗 Join the Cluster
+Use the token and hash generated from the control-plane output:
+```bash
+sudo kubeadm join 192.168.178.101:6443 --token jjxxxxl.9xxxxxxxxxx \
+--discovery-token-ca-cert-hash sha256:xxxxxxxxxxxxxxxxxxxxxxx
+```
+
+
+```bash
+sudo systemctl enable --now kubelet
+```
+
+
+---
+
+
+✅ You now have a fully working Kubernetes cluster with Calico networking.
+
