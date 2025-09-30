@@ -136,8 +136,8 @@ sudo systemctl restart containerd
 ### 🔗 Join the Cluster
 Use the token and hash generated from the control-plane output:
 ```bash
-sudo kubeadm join 192.168.178.101:6443 --token jjz1ql.9gvdqxixocber5fm \
-  --discovery-token-ca-cert-hash sha256:ad2342d48f8b3db68a209253023797d625355d7ab8537dbe220ea94092f2526c
+sudo kubeadm join 192.168.178.101:6443 --token jjz1ql.xxxxxxxxxxxxxxxxxx\
+  --discovery-token-ca-cert-hash sha256:adxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ```bash
@@ -147,3 +147,4 @@ sudo systemctl enable --now kubelet
 ---
 
 ✅ You now have a fully working Kubernetes cluster with Calico networking.
+
